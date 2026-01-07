@@ -1,0 +1,20 @@
+flowrate FT-4001 1003
+flowrate FT-8001 1005
+turbidity NIT-4001 1007
+turbidity NIT-8001 1009
+ph PH-4001 1011
+ph PH-8001 1013
+chlorine CHL-8001 1015
+level LIT-4001 1017
+level LIT-4002 1019
+level LIT-7001 1021
+level LIT-7002 1023
+level LIT-7003 1025
+level LIT-7004 1027
+level LIT-7005 1029
+level LIT-7006 1031
+level LIT-8001 1033
+level LIT-8002 1035
+
+flowtotal FQT-4001 1305
+flowtotal FQT-8001 1307
