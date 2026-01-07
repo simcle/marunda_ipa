@@ -15,6 +15,7 @@
   "dependencies": {
     "jsmodbus": "^4.0.10",
     "modbus-serial": "^8.0.21-no-serial-port",
-    "mqtt": "^5.13.1"
+    "mqtt": "^5.13.1",
+    "serialport": "^13.0.0"
   }
 }

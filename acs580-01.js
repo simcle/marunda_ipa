@@ -215,7 +215,6 @@ async function connect() {
             parity: "none",
         });
 
-        client.setID(1);
         client.setTimeout(1000);
 
         console.log("✅ Connected to");
