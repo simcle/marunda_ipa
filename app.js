@@ -52,6 +52,21 @@ function writeInt32ToHR(hrAddr, rawValue) {
     holdingRegisters.writeFloatBE(rawValue, offset);
 }
 
+function writeBitToHR(hrAddr, bitIndex, value) {
+  const reg0 = hrAddr;      // 0-based
+  const offset = reg0 * 2;      // byte offset
+
+  let current = holdingRegisters.readUInt16BE(offset);
+
+  if (value) {
+    current |= (1 << bitIndex);   // set bit
+  } else {
+    current &= ~(1 << bitIndex);  // clear bit
+  }
+
+  holdingRegisters.writeUInt16BE(current, offset);
+}
+
 const data = {
     plc: '',
     pmp1: {},
@@ -72,6 +87,13 @@ eventBus.on('pmp1', (val) => {
         if(!map) return
         console.log(p.value)
         writeInt32ToHR(map.reg, p.value)
+        if(p.name == 'frequency') {
+            if(p.value) {
+                writeBitToHR(7902, 0, true)
+            } else {
+                writeBitToHR(7902, 0, false)
+            }
+        }
     })
 })
 
@@ -84,6 +106,13 @@ eventBus.on('pmp2', (val) => {
         if(!map) return
         console.log(p.value)
         writeInt32ToHR(map.reg, p.value)
+        if(p.name == 'frequency') {
+            if(p.value) {
+                writeBitToHR(7903, 0, true)
+            } else {
+                writeBitToHR(7903, 0, false)
+            }
+        }
     })
 })
 
