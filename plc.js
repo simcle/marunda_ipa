@@ -3,8 +3,8 @@ import eventBus from "./event.js";
 
 const client = new ModbusRTU()
 
-const PLC_HOST = '192.168.88.200'
-const PLC_PORT = 8502
+const PLC_HOST = '192.168.88.221'
+const PLC_PORT = 502
 const POLLING_ITERVAL = 1000
 const RECONNECT_DELAY = 3000
 
