@@ -52,6 +52,13 @@ const listing = [
         scale: 100
     },
     {
+        name: 'output_volt',
+        num: '01.13',
+        unit: 'V',
+        type: '32bit',
+        scale: 100
+    },
+    {
         name: 'motor_power',
         num: '01.14',
         unit: 'kW/hp',
