@@ -31,7 +31,7 @@ const pmp1RegisterMap = {
     current: { reg: 8407},
     torque: {reg: 8409},
     motor_power: {reg: 8411},
-    dc_volt: {reg: 8415},
+    dc_volt: {reg: 8413},
     kWh_counter: {reg: 8427},
     mWh_counter: {reg: 8431}
 }
@@ -41,7 +41,7 @@ const pmp2RegisterMap = {
     current: { reg: 8507},
     torque: {reg: 8509},
     motor_power: {reg: 8511},
-    dc_volt: {reg: 8515},
+    dc_volt: {reg: 8513},
     kWh_counter: {reg: 8527},
     mWh_counter: {reg: 8531}
 }
