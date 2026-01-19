@@ -198,7 +198,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
         const data = await readAllParameters(client);
         console.log(`📊 Data ${device.name}:`, data);
         eventBus.emit(device.name, data);
-        await sleep(150);  // slight delay between devices
+        await sleep(300);  // slight delay between devices
       } catch (err) {
         console.error(`Polling error ${device.name}:`, err.message);
       }
@@ -265,7 +265,7 @@ async function run() {
   if (!ok) return;
 
   if (!pollingStopper) {
-    pollingStopper = startPollingMultiDevice(client, 1000);
+    pollingStopper = startPollingMultiDevice(client, 2500);
   }
 }
 
