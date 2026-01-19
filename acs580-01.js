@@ -196,6 +196,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
       try {
         client.setID(device.id);
         const data = await readAllParameters(client);
+        console.log(`📊 Data ${device.name}:`, data);
         eventBus.emit(device.name, data);
       } catch (err) {
         console.error(`Polling error ${device.name}:`, err.message);
@@ -270,3 +271,5 @@ async function run() {
 export async function startACS580() {
     run();
 }
+
+startACS580();
