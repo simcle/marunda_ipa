@@ -273,4 +273,3 @@ export async function startACS580() {
     run();
 }
 
-startACS580();
