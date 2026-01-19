@@ -88,7 +88,6 @@ eventBus.on('pmp1', (val) => {
         // save to modbus TCP
         const map = pmp1RegisterMap[p.name]
         if(!map) return
-        console.log(p.value)
         writeInt32ToHR(map.reg, p.value)
         if(p.name == 'frequency') {
             if(p.value) {
@@ -107,7 +106,6 @@ eventBus.on('pmp2', (val) => {
         // save to modbus TCP
         const map = pmp2RegisterMap[p.name]
         if(!map) return
-        console.log(p.value)
         writeInt32ToHR(map.reg, p.value)
         if(p.name == 'frequency') {
             if(p.value) {

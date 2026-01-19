@@ -255,10 +255,10 @@ const downloadVsdData = async (req, res) => {
 
         // COLUMN UNITS
         ws.addRow([
-            '', 'RPM', 'Hz', 'A', 'Nm', 'KW', 'VDC', 'KWH','MWH',
-            '', 'RPM', 'Hz', 'A', 'Nm', 'KW', 'VDC', 'KWH','MWH',
-            '', 'RPM', 'Hz', 'A', 'Nm', 'KW', 'VDC', 'KWH','MWH',
-            '', 'RPM', 'Hz', 'A', 'Nm', 'KW', 'VDC', 'KWH','MWH'
+            '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
+            '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
+            '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
+            '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH'
         ])
         ws.getRow(6).eachCell(c => {
             c.font = { color: { argb: 'FFFFFFFF' }, bold: true };
@@ -347,3 +347,5 @@ export default function startHttpServer() {
     };
     start();
 }
+
+startHttpServer();
