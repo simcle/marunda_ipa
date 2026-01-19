@@ -198,6 +198,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
         const data = await readAllParameters(client);
         console.log(`📊 Data ${device.name}:`, data);
         eventBus.emit(device.name, data);
+        await sleep(150);  // slight delay between devices
       } catch (err) {
         console.error(`Polling error ${device.name}:`, err.message);
       }
@@ -205,7 +206,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
   }, intervalMs);
 };
 
-
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function connect() {
     try {
         await client.connectRTUBuffered("COM3", {
