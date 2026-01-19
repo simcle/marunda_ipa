@@ -3,6 +3,7 @@ import startPollingPlc from "./plc.js";
 import { startACS580} from "./acs580-01.js";
 import { startTcpServer, holdingRegisters } from "./tcpServer.js";
 import eventBus from "./event.js";
+import startHttpServer from "./httpServer.js";
 
 let mqttClient = null
 let mqttIsConnected = false
@@ -120,7 +121,7 @@ eventBus.on('pmp2', (val) => {
 
 async function start() {
     await startTcpServer()
-
+    startHttpServer()
     setInterval(() => {
         mqttClient.publish('marunda/ipa', JSON.stringify(data))
     }, 1000)

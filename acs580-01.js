@@ -185,33 +185,25 @@ const deviceList = [
     { id: 2, name: 'pmp2' },  // Pompa atas
 ];
 
-const startPollingMultiDevice = async (client, intervalMs = 1000) => {
-    let timer = null;
-
-    async function loop() {
-        for (const device of deviceList) {
-            try {
-                client.setID(device.id);
-
-                const data = await readAllParameters(client);
-
-                eventBus.emit(device.name, data);
-                console.log(`📤 ${device.name}`, data.map(d => ({ [d.name]: d.value })));
-
-            } catch (err) {
-                console.error(`Polling error ${device.name}:`, err.message);
-            }
-        }
+const startPollingMultiDevice = (client, intervalMs = 1000) => {
+  return setInterval(async () => {
+    if (!client.isOpen) {
+      await ensureConnected();
+      return;
     }
 
-    timer = setInterval(loop, intervalMs);
-    loop();
-
-    return () => {
-        clearInterval(timer);
-        console.log("Multi-device polling stopped");
-    };
+    for (const device of deviceList) {
+      try {
+        client.setID(device.id);
+        const data = await readAllParameters(client);
+        eventBus.emit(device.name, data);
+      } catch (err) {
+        console.error(`Polling error ${device.name}:`, err.message);
+      }
+    }
+  }, intervalMs);
 };
+
 
 async function connect() {
     try {
@@ -267,22 +259,12 @@ async function ensureConnected() {
 // READ LOOP WITH SELF-HEALING
 // =========================
 async function run() {
-    await ensureConnected();
+  const ok = await ensureConnected();
+  if (!ok) return;
 
-    // Start polling only once
-    if (!pollingStopper) {
-        pollingStopper = await startPollingMultiDevice(client, 1000);
-    }
-
-    // Loop forever to monitor disconnection and auto-reconnect
-    while (true) {
-        if (!client.isOpen) {
-            console.log("⚠️ Connection lost, reconnecting...");
-            await ensureConnected();
-        }
-
-        await new Promise(r => setTimeout(r, 1000));
-    }
+  if (!pollingStopper) {
+    pollingStopper = startPollingMultiDevice(client, 1000);
+  }
 }
 
 export async function startACS580() {
