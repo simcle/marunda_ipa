@@ -1,1 +1,4 @@
 node_modules
+vsd_data.db
+vsd_data.db-shm
+vsd_data.db-wal

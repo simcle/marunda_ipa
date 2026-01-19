@@ -285,7 +285,7 @@ const downloadVsdData = async (req, res) => {
             ])
         }
         ws.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-            if (rowNumber >= 6) {
+            if (rowNumber >= 7) {
                 row.eachCell(cell => {
                     cell.border = borderAll();
                     cell.alignment = { horizontal: 'right', vertical: 'middle' };
