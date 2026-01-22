@@ -81,7 +81,7 @@ const listing = [
     },
     {
         name: 'running_time',
-        num: '76.81',
+        num: '77.11',
         unit: 'h',
         type: '16bit',
         scale: 1
