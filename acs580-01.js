@@ -234,7 +234,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function connect() {
     try {
-        await client.connectRTUBuffered("COM3", {
+        await client.connectRTUBuffered("/dev/ttyUSB0", {
             baudRate: 19200,
             dataBits: 8,
             stopBits: 1,
