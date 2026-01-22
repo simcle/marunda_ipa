@@ -212,7 +212,7 @@ const startPollingMultiDevice = (client, intervalMs = 1000) => {
 
           const data = await readAllParameters(client);
 
-          console.log(`📊 Data ${device.name}:`, data);
+        //   console.log(`📊 Data ${device.name}:`, data);
           eventBus.emit(device.name, data);
 
         } catch (err) {

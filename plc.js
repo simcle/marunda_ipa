@@ -63,7 +63,6 @@ const pollData = async () => {
             const value = readFloat(data, tag.offset)
             message[tag.name] = value.toFixed(2)
         })
-        console.log('send data')
         eventBus.emit('plc', message)
     } catch (error) {
         console.log(error)
