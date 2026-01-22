@@ -81,10 +81,10 @@ const listing = [
     },
     {
         name: 'running_time',
-        num: '05.02',
+        num: '05.03',
         unit: 'h',
         type: '32bit',
-        scale: 1
+        scale: 10
     }
 ]
 
