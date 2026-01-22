@@ -52,7 +52,7 @@ const pollData = async () => {
     try {
         const message = {}
         const test = await client.readHoldingRegisters(1003, 2)
-        console.log(test.data.buffer.readFloatBE(0))
+        console.log(test.buffer.readFloatBE(0))
 
         const regs = await client.readHoldingRegisters(1305, 4)
         message['fqt_4001'] = regs.buffer.readInt32BE(0)
