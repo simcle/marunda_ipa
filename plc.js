@@ -55,15 +55,10 @@ const pollData = async () => {
         const word = test.data[0];
 
         // Extract bit
-        const bit0 = (word >> 0) & 1; // 4X:124.0
         const bit1 = (word >> 1) & 1; // 4X:124.1
         const bit2 = (word >> 2) & 1; // 4X:124.2
-
-        console.log({
-            XB_XFP_4002_CMD_STS: bit0,
-            XB_BLO_7001_CMD_STS: bit1,
-            XB_PMP_7001_CMD_STS: bit2
-        });
+        message['blo_7001'] = bit1
+        message['pmp_7001'] = bit2
 
         const regs = await client.readHoldingRegisters(1305, 4)
         message['fqt_4001'] = regs.buffer.readInt32BE(0)
