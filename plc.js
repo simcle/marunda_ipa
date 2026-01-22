@@ -51,7 +51,7 @@ const pollData = async () => {
     if(!isConnected) return
     try {
         const message = {}
-        const test = await client.readHoldingRegisters(123, 2)
+        const test = await client.readHoldingRegisters(124, 1)
         console.log(test.data)
 
         const regs = await client.readHoldingRegisters(1305, 4)
