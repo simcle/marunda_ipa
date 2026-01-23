@@ -57,7 +57,7 @@ const pollData = async () => {
         // Extract bit
         const bit1 = (word >> 0) & 1; // 4X:124.1
         const bit2 = (word >> 1) & 1; // 4X:124.2
-        console.log(bit1, bit2)
+        
         message['blo_7001'] = bit1
         message['pmp_7001'] = bit2
 
