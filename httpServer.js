@@ -23,6 +23,62 @@ function validateBaseQuery(req, res) {
     }
     return true;
 }
+
+const getFlowRows = (device_id, from, to, mode) => {
+    if (mode == 'HOURLY') {
+        return db.prepare(`
+            SELECT
+                strftime('%Y-%m-%d %H:%M:%S', created_at, 'localtime') AS timestamp,
+                location,
+                tag,
+                status,
+                flow_rate,
+                unit
+            FROM flow_logs
+            WHERE device_id = ?
+              AND datetime(created_at, 'localtime') BETWEEN datetime(?) AND datetime(?)
+            ORDER BY location, tag, timestamp
+        `).all(device_id, from, to);
+    }
+    return db.prepare(`
+        SELECT
+            strftime('%Y-%m-%d %H:%M:%S', created_at, 'localtime') AS timestamp,
+            location,
+            tag,
+            status,
+            flow_rate,
+            unit
+        FROM flow_logs
+        WHERE device_id = ?
+          AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+        ORDER BY location, tag, timestamp
+    `).all(device_id, from, to);
+}
+
+const groupFlow = (rows) => {
+    return Object.values(rows.reduce((acc, row) => {
+        const loc = row.location;
+        const tag = row.tag;
+
+        if (!acc[loc]) {
+            acc[loc] = { location: loc };
+        }
+
+        if (!acc[loc][tag]) {
+            acc[loc][tag] = [];
+        }
+
+        acc[loc][tag].push({
+            timestamp: row.timestamp,
+            status: row.status,
+            flow_rate: row.flow_rate,
+            unit: row.unit
+        });
+
+        return acc;
+    }, {}));
+}
+
 const getVsdData = async (req, res) => {
     if (!validateBaseQuery(req, res)) return;
 
@@ -42,6 +98,7 @@ const getVsdData = async (req, res) => {
                 motor_power,
                 dc_volt,
                 output_volt,
+                running_hour,
                 kwh,
                 mwh
             FROM vsd_logs
@@ -63,6 +120,7 @@ const getVsdData = async (req, res) => {
                 motor_power,
                 dc_volt,
                 output_volt,
+                running_hour,
                 kwh,
                 mwh
             FROM vsd_logs
@@ -70,7 +128,6 @@ const getVsdData = async (req, res) => {
             GROUP BY location, pump, timestamp`
         ).all(device_id, from, to);   
     }
-
     // group by location and pump
     const grouped = rows.reduce((acc, row) => {
         const loc = row.location;
@@ -95,6 +152,7 @@ const getVsdData = async (req, res) => {
             motor_power: row.motor_power,
             dc_volt: row.dc_volt,
             output_volt: row.output_volt,
+            running_hour: row.running_hour,
             kwh: row.kwh,
             mwh: row.mwh
         });
@@ -102,8 +160,13 @@ const getVsdData = async (req, res) => {
         return acc;
     }, {});
 
+    //FLOW
+    const flowRows = getFlowRows(device_id, from, to, mode)
+    const flow = groupFlow(flowRows)
+
+
     const data = Object.values(grouped);
-    res.send({data});
+    res.send({data, flow});
 }
 
 // Excel border all sides function
@@ -135,6 +198,7 @@ const downloadVsdData = async (req, res) => {
                     motor_power,
                     dc_volt,
                     output_volt,
+                    running_hour,
                     kwh,
                     mwh
                 FROM vsd_logs
@@ -156,6 +220,7 @@ const downloadVsdData = async (req, res) => {
                     motor_power,
                     dc_volt,
                     output_volt,
+                    running_hour,
                     kwh,
                     mwh
                 FROM vsd_logs
@@ -188,6 +253,7 @@ const downloadVsdData = async (req, res) => {
                 motor_power: row.motor_power,
                 dc_volt: row.dc_volt,
                 output_volt: row.output_volt,
+                running_hour: row.running_hour,
                 kwh: row.kwh,
                 mwh: row.mwh
             });
@@ -197,22 +263,30 @@ const downloadVsdData = async (req, res) => {
     
         const data = Object.values(grouped);
 
+        //FLOW
+        const flowRows = getFlowRows(device_id, from, to, mode)
+        const flow = groupFlow(flowRows)
+
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet(`VSD REPORT ${mode}`);
     
-        ws.mergeCells('A1', 'AJ1');
+        ws.mergeCells('A1', 'AL1');
         ws.getCell('A1').value = `VSD ${mode} REPORT SPAM KAWASAN MARUNDA`;
         ws.getCell('A1').font = { bold: true, size: 14 };
         ws.getCell('A1').alignment = { horizontal: 'center' };
 
-        ws.mergeCells('A2', 'AJ2');
+        ws.mergeCells('A2', 'AL2');
         ws.getCell('A2').value = `REPORT ${from}`;
         ws.getCell('A2').alignment = { horizontal: 'left' };
 
-        ws.mergeCells('A3', 'R3');
-        ws.getCell('A3').value = 'VSD INTAKE';
-        ws.mergeCells('S3', 'AJ3')
-        ws.getCell('S3').value = 'VSD IPA';
+        ws.mergeCells('A3', 'B4')
+        ws.getCell('A3').value = 'FLOW INTAKE'
+
+        ws.mergeCells('C3', 'T3');
+        ws.getCell('C3').value = 'VSD INTAKE';
+
+        ws.mergeCells('U3', 'AL3')
+        ws.getCell('U3').value = 'VSD IPA';
 
         ws.getRow(3).eachCell(c => {
             c.font = { bold: true };
@@ -221,23 +295,26 @@ const downloadVsdData = async (req, res) => {
         })
 
         // PUMP HEADERS
-        ws.mergeCells('A4', 'I4');
-        ws.getCell('A4').value = 'PUMP 1';
-        ws.mergeCells('J4', 'R4');
-        ws.getCell('J4').value = 'PUMP 2';
-        ws.mergeCells('S4', 'AA4');
-        ws.getCell('S4').value = 'PUMP 1';
-        ws.mergeCells('AB4', 'AJ4');
-        ws.getCell('AB4').value = 'PUMP 2';
-        ws.getRow(4).eachCell(c => {
+        ws.mergeCells('C4', 'K4');
+        ws.getCell('C4').value = 'PUMP 1';
+        ws.mergeCells('L4', 'T4');
+        ws.getCell('L4').value = 'PUMP 2';
+        ws.mergeCells('U4', 'AC4');
+        ws.getCell('U4').value = 'PUMP 1';
+        ws.mergeCells('AD4', 'AL4');
+        ws.getCell('AD4').value = 'PUMP 2';
+        ws.getRow(4).eachCell((c, colNumber) => {
             c.font = { bold: true };
             c.alignment = { horizontal: 'center', vertical: 'middle' };
-            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } };
+            if(colNumber >= 3) {
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE5E7EB' } };
+            }
             c.border = borderAll();
         })
 
         // COLUMN HEADERS
         ws.addRow([
+            'Date', 'Flow rate',
             'Date', 'Speed', 'Freq', 'Current', 'Torque', 'Power', 'DC Bus', 'Counter','',
             'Date', 'Speed', 'Freq', 'Current', 'Torque', 'Power', 'DC Bus', 'Counter','',
             'Date', 'Speed', 'Freq', 'Current', 'Torque', 'Power', 'DC Bus', 'Counter','',
@@ -255,6 +332,7 @@ const downloadVsdData = async (req, res) => {
 
         // COLUMN UNITS
         ws.addRow([
+            '', 'L/s',
             '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
             '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
             '', 'RPM', 'Hz', 'A', '%', 'KW', 'VDC', 'KWH','MWH',
@@ -269,15 +347,17 @@ const downloadVsdData = async (req, res) => {
 
         const intake = data[0] || {pmp1: [], pmp2: []};
         const ipa = data[1] || {pmp1: [], pmp2: []};
-
+        
         const maxRows = Math.max(intake.pmp1.length, intake.pmp2.length, ipa.pmp1.length, ipa.pmp2.length);
         for (let i = 0; i < maxRows; i++) {
+            const in_flow = flow[0].FLOW_OUTLET[i] || {}
             const in_pmp1 = intake.pmp1[i] || {};
             const in_pmp2 = intake.pmp2[i] || {};
             const ipa_pmp1 = ipa.pmp1[i] || {};
             const ipa_pmp2 = ipa.pmp2[i] || {};
             
             ws.addRow([
+                in_flow.timestamp || '', in_flow.flow_rate || 0,
                 in_pmp1.timestamp || '', in_pmp1.speed || 0, in_pmp1.frequency || 0, in_pmp1.current || 0, in_pmp1.torque || 0, in_pmp1.motor_power || 0, in_pmp1.output_volt || 0, in_pmp1.kwh || 0, in_pmp1.mwh || 0,
                 in_pmp2.timestamp || '', in_pmp2.speed || 0, in_pmp2.frequency || 0, in_pmp2.current || 0, in_pmp2.torque || 0, in_pmp2.motor_power || 0, in_pmp2.output_volt || 0, in_pmp2.kwh || 0, in_pmp2.mwh || 0,
                 ipa_pmp1.timestamp || '', ipa_pmp1.speed || 0, ipa_pmp1.frequency || 0, ipa_pmp1.current || 0, ipa_pmp1.torque || 0, ipa_pmp1.motor_power || 0, ipa_pmp1.output_volt || 0, ipa_pmp1.kwh || 0, ipa_pmp1.mwh || 0,
@@ -294,14 +374,15 @@ const downloadVsdData = async (req, res) => {
         });
         
         ws.getColumn(1).width = 20;
-        ws.getColumn(10).width = 20;
-        ws.getColumn(19).width = 20;
-        ws.getColumn(28).width = 20;
+        ws.getColumn(3).width = 20;
+        ws.getColumn(12).width = 20;
+        ws.getColumn(21).width = 20;
+        ws.getColumn(30).width = 20;
         // Filename
         const filename = `nama-file-${Date.now()}.xlsx`;
         const buffer = await wb.xlsx.writeBuffer()
+
         // RESPONSE
-        console.log("Sending file:", buffer);
         res.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             .header("Content-Disposition", `attachment; filename="${filename}"`)
             .send(buffer);
@@ -347,3 +428,4 @@ export default function startHttpServer() {
     };
     start();
 }
+startHttpServer()

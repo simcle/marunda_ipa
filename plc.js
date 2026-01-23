@@ -51,7 +51,8 @@ const pollData = async () => {
     if(!isConnected) return
     try {
         const message = {}
-        const test = await client.readHoldingRegisters(124, 1)
+        const test = await client.readHoldingRegisters(3, 4)
+        console.log(test)
         const word = test.data[0];
 
         // Extract bit
