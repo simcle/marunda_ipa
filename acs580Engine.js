@@ -134,7 +134,7 @@ async function connect() {
             parity: "none",
         });
 
-        client.setTimeout(800);
+        client.setTimeout(500);
         console.log("✅ RS485 Connected");
         return true;
 
@@ -162,6 +162,24 @@ async function ensureConnected() {
     return ok;
 }
 
+
+// ======================================================
+// PRE-CHECK SLAVE (FAST PROBE)
+// ======================================================
+const precheckParam = {
+    name: 'frequency',
+    num: '01.06',
+    unit: 'Hz',
+    type: '32bit',
+    scale: 100
+};
+
+async function precheckSlave() {
+    // 1 request ringan saja
+    await readParameter(precheckParam);
+}
+
+
 // ======================================================
 // POLLING LOOP (SELF-TIMED)
 // ======================================================
@@ -184,7 +202,7 @@ async function pollingLoop(intervalMs = 1000) {
 
             try {
                 client.setID(device.id);
-
+                await precheckSlave()
                 const data = await readAllParameters();
                 eventBus.emit(device.name, data);
                 console.log(device.name, data)
@@ -207,7 +225,7 @@ async function pollingLoop(intervalMs = 1000) {
                 }
             }
 
-            await sleep(200);
+            await sleep(100);
         }
 
     } catch (err) {
