@@ -189,7 +189,7 @@ const readAllParameters = async (client) => {
 
 const deviceList = [
     { id: 1, name: 'pmp1' },  // Pompa bawah
-    // { id: 2, name: 'pmp2' },  // Pompa atas
+    { id: 2, name: 'pmp2' },  // Pompa atas
 ];
 
 const startPollingMultiDevice = (client, intervalMs = 1000) => {
