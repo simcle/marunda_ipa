@@ -51,12 +51,14 @@ const pollData = async () => {
     if(!isConnected) return
     try {
         const message = {}
-        const test = await client.readHoldingRegisters(48, 2)
-        const word = test.data;
-        console.log(word)
-        // Extract bit
+        const test = await client.readHoldingRegisters(3, 2)
+        const wordBlo = test.data[0];
+        const wordPmp = test.data[1];
         
+        const bitBlo = (wordBlo >> 15) & 1
+        const bitpmp = (wordPmp >> 0) & 1
         
+        console.log(bitBlo, bitpmp)
         // message['blo_7001'] = bit1
         // message['pmp_7001'] = bit2
 
