@@ -52,6 +52,12 @@ const pmp2RegisterMap = {
     mWh_counter: {reg: 8531}
 }
 
+function writeInt16ToHR(hrAddr, value) {
+  const reg0 = hrAddr - 1;
+  const offset = reg0 * 2;
+  holdingRegisters.writeInt16BE(value, offset);
+}
+
 function writeInt32ToHR(hrAddr, rawValue) {
     const reg0 = hrAddr
     const offset = reg0 * 2; // register → byte
@@ -91,7 +97,12 @@ eventBus.on('pmp1', (val) => {
         // save to modbus TCP
         const map = pmp1RegisterMap[p.name]
         if(!map) return
-        writeInt32ToHR(map.reg, p.value)
+        if(p.name == 'running_time') {
+            const hours = Math.floor(p.value)
+            writeInt16ToHR(8424, hours)
+        } else {
+            writeInt32ToHR(map.reg, p.value)
+        }
         if(p.name == 'frequency') {
             if(p.value) {
                 writeBitToHR(7902, 0, true)
@@ -109,7 +120,12 @@ eventBus.on('pmp2', (val) => {
         // save to modbus TCP
         const map = pmp2RegisterMap[p.name]
         if(!map) return
-        writeInt32ToHR(map.reg, p.value)
+        if(p.name == 'running_time') {
+            const hours = Math.floor(p.value)
+            writeInt16ToHR(8524, hours)
+        } else {
+            writeInt32ToHR(map.reg, p.value)
+        }
         if(p.name == 'frequency') {
             if(p.value) {
                 writeBitToHR(7903, 0, true)
