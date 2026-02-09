@@ -123,6 +123,7 @@ eventBus.on('pmp2', (val) => {
         if(p.name == 'running_time') {
             const hours = Math.floor(p.value)
             writeInt16ToHR(8525, hours)
+            console.log(hours)
         } else {
             writeInt32ToHR(map.reg, p.value)
         }
