@@ -205,7 +205,7 @@ async function pollingLoop(intervalMs = 1000) {
                 await precheckSlave()
                 const data = await readAllParameters();
                 eventBus.emit(device.name, data);
-                console.log(device.name, data)
+                
                 device.failCount = 0;
 
             } catch (err) {
