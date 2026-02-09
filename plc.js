@@ -51,7 +51,7 @@ const pollData = async () => {
     if(!isConnected) return
     try {
         const message = {}
-        const test = await client.readHoldingRegisters(48, 2)
+        const test = await client.readHoldingRegisters(47, 2)
         const intBlo = test.data[0];
         const intPmp = test.data[1];
         
