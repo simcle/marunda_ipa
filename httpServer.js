@@ -40,19 +40,36 @@ const getFlowRows = (device_id, from, to, mode) => {
             ORDER BY location, tag, timestamp
         `).all(device_id, from, to);
     }
-    return db.prepare(`
-        SELECT
-            strftime('%Y-%m-%d %H:%M:%S', created_at, 'localtime') AS timestamp,
-            location,
-            tag,
-            status,
-            flow_rate,
-            unit
-        FROM flow_logs
-        WHERE device_id = ?
-          AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
-        ORDER BY location, tag, timestamp
-    `).all(device_id, from, to);
+    if (mode == 'HOURLY') {
+        return db.prepare(`
+            SELECT
+                strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') AS timestamp,
+                location,
+                tag,
+                status,
+                AVG(flow_rate) as flow_rate,
+                unit
+            FROM flow_logs
+            WHERE device_id = ?
+              AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+            ORDER BY location, tag, timestamp
+        `).all(device_id, from, to);
+    }
+    if (mode == 'MONTHLY') {
+        return db.prepare(`
+            SELECT
+                strftime('%Y-%m-%d', created_at, 'localtime') AS timestamp,
+                location,
+                tag,
+                status,
+                AVG(flow_rate) as flow_rate,
+                unit
+            FROM flow_logs
+            WHERE device_id = ?
+              AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+            ORDER BY location, tag, timestamp
+        `).all(device_id, from, to);
+    }
 }
 
 const groupFlow = (rows) => {
@@ -107,22 +124,44 @@ const getVsdData = async (req, res) => {
         ).all(device_id, from, to);
     }
     
-    if (mode === 'DAILY' || mode === 'MONTHLY') {
+    if (mode === 'DAILY') {
         rows = db.prepare(`
             SELECT
-                strftime('%Y-%m-%d %H:%M:%S', created_at, 'localtime') as timestamp,
+                strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') as timestamp,
                 location,
-                pump,
-                speed,
-                frequency,
-                current,
-                torque,
-                motor_power,
-                dc_volt,
-                output_volt,
-                running_hour,
-                kwh,
-                mwh
+                
+                AVG(speed) as speed,
+                AVG(frequency) as frequency,
+                AVG(current) as current,
+                AVG(torque) as torque,
+                AVG(motor_power) as motor_power,
+                AVG(dc_volt) as dc_volt,
+                AVG(output_volt) as output_volt,
+                MAX(running_hour) as running_hour,
+                MAX(kwh) as kwh,
+                MAX(mwh) as mwh
+            FROM vsd_logs
+            WHERE device_id = ? AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+            GROUP BY location, pump, timestamp`
+        ).all(device_id, from, to);   
+    }
+
+    if (mode === 'MONTHLY') {
+        rows = db.prepare(`
+            SELECT
+                strftime('%Y-%m-%d', created_at, 'localtime') as timestamp,
+                location,
+
+                AVG(speed) as speed,
+                AVG(frequency) as frequency,
+                AVG(current) as current,
+                AVG(torque) as torque,
+                AVG(motor_power) as motor_power,
+                AVG(dc_volt) as dc_volt,
+                AVG(output_volt) as output_volt,
+                MAX(running_hour) as running_hour,
+                MAX(kwh) as kwh,
+                MAX(mwh) as mwh
             FROM vsd_logs
             WHERE device_id = ? AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
             GROUP BY location, pump, timestamp`
@@ -207,22 +246,44 @@ const downloadVsdData = async (req, res) => {
             ).all(device_id, from, to);
         }
         
-        if (mode === 'DAILY' || mode === 'MONTHLY') {
+        if (mode === 'DAILY') {
             rows = db.prepare(`
                 SELECT
-                    strftime('%Y-%m-%d %H:%M:%S', created_at, 'localtime') as timestamp,
+                    strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') as timestamp,
                     location,
-                    pump,
-                    speed,
-                    frequency,
-                    current,
-                    torque,
-                    motor_power,
-                    dc_volt,
-                    output_volt,
-                    running_hour,
-                    kwh,
-                    mwh
+                    
+                    AVG(speed) as speed,
+                    AVG(frequency) as frequency,
+                    AVG(current) as current,
+                    AVG(torque) as torque,
+                    AVG(motor_power) as motor_power,
+                    AVG(dc_volt) as dc_volt,
+                    AVG(output_volt) as output_volt,
+                    MAX(running_hour) as running_hour,
+                    MAX(kwh) as kwh,
+                    MAX(mwh) as mwh
+                FROM vsd_logs
+                WHERE device_id = ? AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+                GROUP BY location, pump, timestamp`
+            ).all(device_id, from, to);   
+        }
+
+        if (mode === 'MONTHLY') {
+            rows = db.prepare(`
+                SELECT
+                    strftime('%Y-%m-%d', created_at, 'localtime') as timestamp,
+                    location,
+
+                    AVG(speed) as speed,
+                    AVG(frequency) as frequency,
+                    AVG(current) as current,
+                    AVG(torque) as torque,
+                    AVG(motor_power) as motor_power,
+                    AVG(dc_volt) as dc_volt,
+                    AVG(output_volt) as output_volt,
+                    MAX(running_hour) as running_hour,
+                    MAX(kwh) as kwh,
+                    MAX(mwh) as mwh
                 FROM vsd_logs
                 WHERE device_id = ? AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
                 GROUP BY location, pump, timestamp`
