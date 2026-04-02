@@ -129,7 +129,7 @@ const getVsdData = async (req, res) => {
             SELECT
                 strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') as timestamp,
                 location,
-                
+                pump,
                 AVG(speed) as speed,
                 AVG(frequency) as frequency,
                 AVG(current) as current,
@@ -151,7 +151,7 @@ const getVsdData = async (req, res) => {
             SELECT
                 strftime('%Y-%m-%d', created_at, 'localtime') as timestamp,
                 location,
-
+                pump,
                 AVG(speed) as speed,
                 AVG(frequency) as frequency,
                 AVG(current) as current,
@@ -252,7 +252,7 @@ const downloadVsdData = async (req, res) => {
                 SELECT
                     strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') as timestamp,
                     location,
-                    
+                    pump,
                     AVG(speed) as speed,
                     AVG(frequency) as frequency,
                     AVG(current) as current,
@@ -274,7 +274,7 @@ const downloadVsdData = async (req, res) => {
                 SELECT
                     strftime('%Y-%m-%d', created_at, 'localtime') as timestamp,
                     location,
-
+                    pump,
                     AVG(speed) as speed,
                     AVG(frequency) as frequency,
                     AVG(current) as current,
