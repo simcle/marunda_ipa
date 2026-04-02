@@ -47,11 +47,12 @@ const getFlowRows = (device_id, from, to, mode) => {
                 location,
                 tag,
                 status,
-                AVG(flow_rate) as flow_rate,
+                ROUND(AVG(flow_rate),2) as flow_rate,
                 unit
             FROM flow_logs
             WHERE device_id = ?
               AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+            GROUP BY location, tag, timestamp
             ORDER BY location, tag, timestamp
         `).all(device_id, from, to);
     }
@@ -67,6 +68,7 @@ const getFlowRows = (device_id, from, to, mode) => {
             FROM flow_logs
             WHERE device_id = ?
               AND date(created_at, 'localtime') BETWEEN date(?) AND date(?)
+            GROUP BY location, tag, timestamp
             ORDER BY location, tag, timestamp
         `).all(device_id, from, to);
     }
