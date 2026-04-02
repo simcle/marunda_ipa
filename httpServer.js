@@ -170,7 +170,7 @@ const getVsdData = async (req, res) => {
     // group by location and pump
     const grouped = rows.reduce((acc, row) => {
         const loc = row.location;
-        const pumpKey = row.pump.toLowerCase(); // PMP1 → pmp1
+        const pumpKey = row.pump?.toLowerCase(); // PMP1 → pmp1
 
         // init location
         if (!acc[loc]) {
@@ -293,7 +293,7 @@ const downloadVsdData = async (req, res) => {
         // group by location and pump
         const grouped = rows.reduce((acc, row) => {
             const loc = row.location;
-            const pumpKey = row.pump.toLowerCase(); // PMP1 → pmp1
+            const pumpKey = row.pump?.toLowerCase(); // PMP1 → pmp1
     
             // init location
             if (!acc[loc]) {
