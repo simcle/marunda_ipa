@@ -40,7 +40,7 @@ const getFlowRows = (device_id, from, to, mode) => {
             ORDER BY location, tag, timestamp
         `).all(device_id, from, to);
     }
-    if (mode == 'HOURLY') {
+    if (mode == 'DAILY') {
         return db.prepare(`
             SELECT
                 strftime('%Y-%m-%d %H:00:00', created_at, 'localtime') AS timestamp,
