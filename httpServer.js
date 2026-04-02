@@ -63,7 +63,7 @@ const getFlowRows = (device_id, from, to, mode) => {
                 location,
                 tag,
                 status,
-                AVG(flow_rate) as flow_rate,
+                ROUND(AVG(flow_rate), 2) as flow_rate,
                 unit
             FROM flow_logs
             WHERE device_id = ?
